@@ -5,7 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch xltm",
+            "name": "Launch xltm ./outputs",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}\\xltm.py",
+            "console": "integratedTerminal",
+            "args": [
+                "./example.xlsx",
+                "./outputs"
+            ]
+        },
+        {
+            "name": "Launch xltm no output",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}\\xltm.py",

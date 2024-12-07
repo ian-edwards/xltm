@@ -169,3 +169,7 @@ cython_debug/
 
 # Excel Files
 *.xlsx
+*.xlsm
+
+# xltm Outputs
+outputs/

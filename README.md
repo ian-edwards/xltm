@@ -1,6 +1,6 @@
 # xltm
 
-xltm is a Python tool for creating csv tilemaps from Excel files.
+xltm is a Python project for converting Excel workbooks into csv tilemaps with corresponding image files.
 
 ## Excel
 
@@ -10,7 +10,7 @@ Excel Desktop and Excel Web can be used to generate tilemaps by inserting [pictu
 
 ## Images
 
-All images are output to the working directory named with unique ids:
+All images are extracted from the workbook and are written to the output directory named with unique ids:
 ```
 0.png
 1.png
@@ -23,7 +23,7 @@ Extensions depend on the source format of the image in Excel.
 
 ## Sheets
 
-Each sheet is output to the working directory as a csv file with the same name:
+Each sheet in the workbook is written to the output directory as a csv file with the same name:
 ```
 forest1.csv
 forest2.csv
@@ -46,25 +46,38 @@ Empty entries have no image:
 ```
 ## Usage
 
-xltm is invoked via the command line:
+### Command Line
+
+xltm may be invoked directly via the command line:
 
 ```console
-python xltm.py example.xlsx
+python xltm.py ./your/input/file/path/here.xlsx
 ```
 
-The first parameter is the path of the Excel file to process.
+```console
+python xltm.py ./your/input/file/path/here.xlsx ./your/output/directory/here
+```
 
-If the first parameter is omitted then no outputs are generated.
+The first parameter is required and is the path of the Excel file to process.
+
+The second parameter is optional and is the directory where outputs will be written.
+
+If the second parameter is omitted outputs are written to the current directory.
+
+### Python Module
 
 ## Requirements
 
-xltm is active on Python 3.13.
+Not tested 3.8 >= Python < 3.13
 
-It is not compatible with Python < 3.8.
+Not compatible Python < 3.8
 
-It is untested on 3.8 >= Python < 3.13.
 
-There are no dependencies.
+## Compatibility
+
+xltm is compatible with xlsx and xlsm files.
+
+xltm is not compatible with xlsb, xls or any other Excel files.
 
 ## Authors
 
