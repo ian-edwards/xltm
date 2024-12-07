@@ -1,12 +1,16 @@
 # xltm
 
-xltm is a Python project for converting Excel workbooks into csv tilemaps with corresponding image files.
+xltm is a Python library that converts Excel workbooks into csv tilemaps with corresponding image files.
 
-## Excel
-
-Excel Desktop and Excel Web can be used to generate tilemaps by inserting [pictures in-cell](https://support.microsoft.com/en-us/office/insert-picture-in-cell-in-excel-e9317aee-4294-49a3-875c-9dd95845bab0).
+Excel Desktop and Excel Web can be used to generate tilemaps by inserting [pictures in-cell](https://support.microsoft.com/en-us/office/insert-picture-in-cell-in-excel-e9317aee-4294-49a3-875c-9dd95845bab0):
 
 ![Example Tilemap](./example.png)
+
+This can be a quick and easy way to generate a large number of visual tilemaps.
+
+Unfortunately, Excel files are not a convenient format to use in other projects.
+
+xltm simplifies this by converting complex Excel files into easier to use simple csv and image files.
 
 ## Images
 
@@ -17,13 +21,13 @@ All images are extracted from the workbook and are written to the output directo
 2.jpeg
 4.jpg
 ```
-Ids are unique non-negative integers that may not be contiguous.
+Ids are non-negative integers that may not be contiguous.
 
 Extensions depend on the source format of the image in Excel.
 
 ## Sheets
 
-Each sheet in the workbook is written to the output directory as a csv file with the same name:
+Each sheet in the workbook is written to the output directory as a csv file named the same as the sheet:
 ```
 forest1.csv
 forest2.csv
@@ -48,7 +52,7 @@ Empty entries have no image:
 
 ### Command Line
 
-xltm may be invoked directly via the command line:
+xltm may be invoked directly via the command line with either 1 or 2 input parameters:
 
 ```console
 python xltm.py ./your/input/file/path/here.xlsx
@@ -64,20 +68,30 @@ The second parameter is optional and is the directory where outputs will be writ
 
 If the second parameter is omitted outputs are written to the current directory.
 
-### Python Module
+### Python Code
 
-## Requirements
+```python
+import xltm
 
-Not tested 3.8 >= Python < 3.13
-
-Not compatible Python < 3.8
-
+with xltm.read_excel('./your/input/file/path/here.xlsx') as xl:
+    print('todo')
+```
 
 ## Compatibility
 
-xltm is compatible with xlsx and xlsm files.
+### Python
 
-xltm is not compatible with xlsb, xls or any other Excel files.
+xltm is compatible with Pyton 3.13
+
+xltm is not tested with 3.8 >= Python < 3.13
+
+xltm is not compatible with Python < 3.8
+
+### Excel
+
+xltm is compatible with xlsx and xlsm files
+
+xltm is not compatible with xlsb, xls or any other Excel files
 
 ## Authors
 
