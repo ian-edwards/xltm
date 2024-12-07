@@ -5,13 +5,18 @@ from xml.etree import ElementTree
 from xml.etree.ElementTree import Element
 from functools import reduce
 import sys
-import csv
 import re
 
-# Images
 def write_images(path: str, xl: ExcelFile):
     for (id, data, ext) in read_images(xl):
         Path(path).joinpath(Path(f'{id}{ext}')).write_bytes(data)
+
+def write_sheets(path: str, xl: ExcelFile):
+    for (name, cells) in book_sheets(xl).items():
+        Path(path).joinpath(Path(f'{name}.csv')).write_text(serialize_csv(cells))
+
+def serialize_csv(cells: list[int]):
+    return '\n'.join([','.join([str(c) if c is not None else '' for c in r]) for r in cells])
 
 def read_excel(path: str):
     return ExcelFile(path)
@@ -33,12 +38,6 @@ def image_elements(xl: ExcelFile):
 
 def images_info(zip: ExcelFile):
     return [(image_path(e), image_id(e)) for e in image_elements(zip)]
-
-# Sheets
-def write_sheets(path: str, xl: ExcelFile):
-    for (name, cells) in book_sheets(xl).items():
-        with Path(path).joinpath(Path(f'{name}.csv')).open('w', newline='') as file:
-            csv.writer(file).writerows(cells)
 
 def book_sheets(xl: ExcelFile):
     return {sheet_name(e) : cells_csv(sheet_cells(sheet_path(e), xl)) for e in xml_elements('sheet', read_file('xl/workbook.xml', xl))}
@@ -76,7 +75,6 @@ def rows_count(cells: dict[(int, int), int]):
 def columns_count(cells: dict[(int, int), int]):
     return max([k[1] for k in cells.keys()]) + 1
 
-# Program
 def execute_xltm(args: list[str]):
     if len(args) > 1:
         with read_excel(sys.argv[1]) as zip:
