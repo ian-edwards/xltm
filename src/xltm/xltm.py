@@ -3,27 +3,45 @@ from io import BytesIO
 from zipfile import ZipFile
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element
+from dataclasses import dataclass
 from functools import reduce
 import sys
 import re
 
-def write_outputs(path: str, xl: ZipFile):
-    write_images(path, xl)
-    write_sheets(path, xl)
+@dataclass
+class Image:
+    id: int
+    extension: str
+    data: bytes
 
-def write_images(path: str, xl: ZipFile):
-    for (id, data, ext) in read_images(xl):
-        Path(path).joinpath(Path(f'{id}{ext}')).write_bytes(data)
+@dataclass
+class Sheet:
+    name: str
+    cells: list[list[str]]
 
-def write_sheets(path: str, xl: ZipFile):
-    for (name, cells) in read_sheets(xl).items():
-        Path(path).joinpath(Path(f'{name}.csv')).write_text(serialize_csv(cells))
+def write_outputs(outdir: str, xlfile: ZipFile):
+    write_images(outdir, read_images(xlfile))
+    write_sheets(outdir, read_sheets(xlfile))
 
-def read_images(xl: ZipFile):
-    return [(i, xl.read(p), Path(p).suffix) for p, i in images_info(xl)]
+def write_images(outdir: str, images: list[Image]):
+    for image in images:
+        write_image(outdir, image)
 
-def read_sheets(xl: ZipFile) -> dict[str, list[list[str]]]:
-    return {e.get('name') : cells_csv(read_cells(f'xl/worksheets/sheet{e.get('sheetId')}.xml', xl)) for e in xml_elements('sheet', read_file('xl/workbook.xml', xl))}
+def write_sheets(outdir: str, sheets: list[Sheet]):
+    for sheet in sheets:
+        write_sheet(outdir, sheet)
+
+def write_sheet(outdir: str, sheet: Sheet):
+    Path(outdir).joinpath(Path(f'{sheet.name}.csv')).write_text(serialize_csv(sheet.cells))
+
+def write_image(outdir: str, image: Image):
+    Path(outdir).joinpath(Path(f'{image.id}{image.extension}')).write_bytes(image.data)
+
+def read_images(xlfile: ZipFile):
+    return [Image(i, Path(p).suffix, xlfile.read(p)) for p, i in images_info(xlfile)]
+
+def read_sheets(xl: ZipFile):
+    return [Sheet(e.get('name'), cells_matrix(read_cells(f'xl/worksheets/sheet{e.get('sheetId')}.xml', xl))) for e in xml_elements('sheet', read_file('xl/workbook.xml', xl))]
 
 def image_id(element: Element):
     return int(element.get('Id')[3:])
@@ -37,7 +55,7 @@ def image_elements(xl: ZipFile) -> list[Element]:
 def images_info(zip: ZipFile):
     return [(image_path(e), image_id(e)) for e in image_elements(zip)]
 
-def cells_csv(cells: dict[(int, int), int]):
+def cells_matrix(cells: dict[(int, int), int]) -> list[list[str]]:
     return [[cells.get((r, c)) for c in range(columns_count(cells))] for r in range(rows_count(cells))]
 
 def read_cells(sheetpath: str, xlfile: ZipFile) -> dict[str, list[list[str]]]:
@@ -72,7 +90,7 @@ def output_path(args: list[str]):
 
 if __name__ == "__main__":
     if len(args := sys.argv) > 1:
-        with ZipFile(args[1]) as zip:
-            write_outputs(output_path(args), zip)
+        with ZipFile(args[1]) as xlfile:
+            write_outputs(output_path(args), xlfile)
     else:
         sys.exit('Error Code 2: Input File Required')

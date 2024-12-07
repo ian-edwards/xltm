@@ -1,39 +1,39 @@
 # xltm
 
-xltm is a Python library that converts Excel workbooks into csv tilemaps with corresponding image files.
+xltm is a Python library that converts Excel files into csv tilemaps with corresponding image files
 
-Excel Desktop and Excel Web can be used to generate tilemaps by inserting [pictures in-cell](https://support.microsoft.com/en-us/office/insert-picture-in-cell-in-excel-e9317aee-4294-49a3-875c-9dd95845bab0):
+Excel Desktop and Excel Web can be used to generate tilemaps by inserting [pictures in-cell](https://support.microsoft.com/en-us/office/insert-picture-in-cell-in-excel-e9317aee-4294-49a3-875c-9dd95845bab0)
 
 ![Example Tilemap](./example.png)
 
-This can be a quick and easy way to generate a large number of visual tilemaps.
+This can be a quick and easy way to generate a large number of visual tilemaps
 
-Unfortunately, Excel files are not a convenient format to use in other projects.
+Unfortunately, Excel files are not a convenient format to use in other projects
 
-xltm simplifies this by converting complex Excel files into easier to use simple csv and image files.
+xltm simplifies this by converting complex Excel files into easier to use simple csv and image files
 
 ## Images
 
-All images are extracted from the workbook and are written to the output directory named with unique ids:
+All images are extracted from the workbook and are written to the output directory named with unique ids
 ```
 1.png
 2.png
 3.jpeg
 5.jpg
 ```
-Ids are positive integers that may not be contiguous.
+Ids are positive integers that may not be contiguous
 
-Extensions depend on the source format of the image in Excel.
+Extensions depend on the source format of the image in Excel
 
 ## Sheets
 
-Each sheet in the workbook is written to the output directory as a csv file named the same as the sheet:
+Each sheet in the workbook is written to the output directory as a csv file named the same as the sheet
 ```
 forest1.csv
 forest2.csv
 ```
 
-Each entry in the csv file corresponds to an image id:
+Each entry in the csv file corresponds to an image id
 ```
 3,3,3,3,3
 3,1,1,2,3
@@ -41,7 +41,7 @@ Each entry in the csv file corresponds to an image id:
 1,1,1,1,2
 ```
 
-Empty entries have no image:
+Empty entries have no image
 ```
 3,3,3,,3
 3,,1,2,3
@@ -52,29 +52,38 @@ Empty entries have no image:
 
 ### Command Line
 
-xltm may be invoked directly via the command line with either 1 or 2 input parameters:
+xltm may be invoked directly via the command line with either 1 or 2 input parameters
 
 ```console
-python xltm.py ./your/input/file/path/here.xlsx
+python xltm.py ./input/file/path.xlsx
 ```
 
 ```console
-python xltm.py ./your/input/file/path/here.xlsx ./your/output/directory/here
+python xltm.py ./input/file/path.xlsx ./output/directory/path
 ```
 
-The first parameter is required and is the path of the Excel file to process.
+The first parameter is required and is the path of the Excel file to process
 
-The second parameter is optional and is the directory where outputs will be written.
+The second parameter is optional and is the directory where outputs will be written
 
-If the second parameter is omitted outputs are written to the current directory.
+If the second parameter is omitted outputs are written to the current directory
 
 ### Python Code
 
 ```python
 import xltm
+from zipfile import ZipFile
 
-with xltm.read_excel('./your/input/file/path/here.xlsx') as xl:
-    print('todo')
+with ZipFile('./input/file/path.xlsx') as xlfile:
+    images = xltm.read_images(xlfile)
+    for image in images:
+        print(f'name: {todo}')
+        print(f'data: {todo}')
+
+    sheets = xltm.read_sheets(xlfile)
+    for sheet in sheets:
+        print(f'name: {todo}')
+        print(f'data: {todo}')
 ```
 
 ## Compatibility

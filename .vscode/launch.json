@@ -5,24 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch xltm ./outputs",
+            "name": "Launch xltm",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}\\xltm.py",
+            "program": "${workspaceFolder}\\src\\xltm\\xltm.py",
             "console": "integratedTerminal",
             "args": [
                 "./example.xlsx",
                 "./outputs"
-            ]
-        },
-        {
-            "name": "Launch xltm no output",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}\\xltm.py",
-            "console": "integratedTerminal",
-            "args": [
-                "./example.xlsx"
             ]
         }
     ]
