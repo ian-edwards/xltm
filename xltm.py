@@ -1,64 +1,50 @@
 from pathlib import Path
 from io import BytesIO
-from zipfile import ZipFile as ExcelFile
+from zipfile import ZipFile
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element
 from functools import reduce
 import sys
 import re
 
-def write_images(path: str, xl: ExcelFile):
+def write_outputs(path: str, xl: ZipFile):
+    write_images(path, xl)
+    write_sheets(path, xl)
+
+def write_images(path: str, xl: ZipFile):
     for (id, data, ext) in read_images(xl):
         Path(path).joinpath(Path(f'{id}{ext}')).write_bytes(data)
 
-def write_sheets(path: str, xl: ExcelFile):
-    for (name, cells) in book_sheets(xl).items():
+def write_sheets(path: str, xl: ZipFile):
+    for (name, cells) in read_sheets(xl).items():
         Path(path).joinpath(Path(f'{name}.csv')).write_text(serialize_csv(cells))
 
-def serialize_csv(cells: list[int]):
-    return '\n'.join([','.join([str(c) if c is not None else '' for c in r]) for r in cells])
-
-def read_excel(path: str):
-    return ExcelFile(path)
-
-def read_images(xl: ExcelFile):
+def read_images(xl: ZipFile):
     return [(i, xl.read(p), Path(p).suffix) for p, i in images_info(xl)]
 
-def is_image(element: Element):
-    return element.get('Type').endswith('/image')
+def read_sheets(xl: ZipFile) -> dict[str, list[list[str]]]:
+    return {e.get('name') : cells_csv(read_cells(f'xl/worksheets/sheet{e.get('sheetId')}.xml', xl)) for e in xml_elements('sheet', read_file('xl/workbook.xml', xl))}
 
 def image_id(element: Element):
-    return int(element.get('Id')[3:]) - 1
+    return int(element.get('Id')[3:])
 
 def image_path(element: Element):
     return 'xl' + element.get('Target')[2:]
 
-def image_elements(xl: ExcelFile):
-    return [e for e in xml_elements('Relationship', read_file('xl/richData/_rels/richValueRel.xml.rels', xl)) if is_image(e)]
+def image_elements(xl: ZipFile) -> list[Element]:
+    return [e for e in xml_elements('Relationship', read_file('xl/richData/_rels/richValueRel.xml.rels', xl)) if e.get('Type').endswith('/image')]
 
-def images_info(zip: ExcelFile):
+def images_info(zip: ZipFile):
     return [(image_path(e), image_id(e)) for e in image_elements(zip)]
-
-def book_sheets(xl: ExcelFile):
-    return {sheet_name(e) : cells_csv(sheet_cells(sheet_path(e), xl)) for e in xml_elements('sheet', read_file('xl/workbook.xml', xl))}
 
 def cells_csv(cells: dict[(int, int), int]):
     return [[cells.get((r, c)) for c in range(columns_count(cells))] for r in range(rows_count(cells))]
 
-def sheet_cells(path: str, xl: ExcelFile):
-    return {cell_coordinates(c) : cell_image(c) for c in xml_elements('c', read_file(path, xl))}
+def read_cells(sheetpath: str, xlfile: ZipFile) -> dict[str, list[list[str]]]:
+    return {(cell_row(a := c.get('r')), cell_column(a)) : c.get('vm') for c in xml_elements('c', read_file(sheetpath, xlfile))}
 
-def sheet_name(sheet: Element):
-    return sheet.get('name')
-
-def sheet_path(sheet: Element):
-    return f'xl/worksheets/sheet{sheet.get('sheetId')}.xml'
-
-def cell_coordinates(cell: Element):
-    return (cell_row(a := cell.get('r')), cell_column(a))
-
-def cell_image(cell: Element):
-    return int(cell.get('vm')) - 1
+def serialize_csv(cells: list[int]):
+    return '\n'.join([','.join([c if c is not None else '' for c in r]) for r in cells])
 
 def cell_row(address: str):
     return int(re.match('[A-Z]+(?P<row>\\d+)', address).group('row')) - 1
@@ -75,28 +61,18 @@ def rows_count(cells: dict[(int, int), int]):
 def columns_count(cells: dict[(int, int), int]):
     return max([k[1] for k in cells.keys()]) + 1
 
-def execute_xltm(args: list[str]):
-    if len(args) > 1:
-        with read_excel(sys.argv[1]) as zip:
-            write_outputs(output_path(args), zip)
-    else:
-        sys.exit('Error Code 2: Input File Required')
-
-def write_outputs(path: str, xl: ExcelFile):
-    write_images(path, xl)
-    write_sheets(path, xl)
-
-def output_path(args: list[str]):
-    return args[2] if len(args) > 2 else './'
-
-def read_file(path: str, xl: ExcelFile):
+def read_file(path: str, xl: ZipFile):
     return ElementTree.parse(BytesIO(xl.read(path)))
 
 def xml_elements(path: str, tree: ElementTree):
     return tree.findall(f'.//{{*}}{path}')
 
-def is_executed():
-    return __name__ == "__main__"
+def output_path(args: list[str]):
+    return args[2] if len(args) > 2 else './'
 
-if is_executed():
-    execute_xltm(sys.argv)
+if __name__ == "__main__":
+    if len(args := sys.argv) > 1:
+        with ZipFile(args[1]) as zip:
+            write_outputs(output_path(args), zip)
+    else:
+        sys.exit('Error Code 2: Input File Required')

@@ -16,12 +16,12 @@ xltm simplifies this by converting complex Excel files into easier to use simple
 
 All images are extracted from the workbook and are written to the output directory named with unique ids:
 ```
-0.png
 1.png
-2.jpeg
-4.jpg
+2.png
+3.jpeg
+5.jpg
 ```
-Ids are non-negative integers that may not be contiguous.
+Ids are positive integers that may not be contiguous.
 
 Extensions depend on the source format of the image in Excel.
 
@@ -35,17 +35,17 @@ forest2.csv
 
 Each entry in the csv file corresponds to an image id:
 ```
-0,0,0,0,0
-0,1,1,2,0
-0,2,2,4,0
+3,3,3,3,3
+3,1,1,2,3
+3,2,2,5,3
 1,1,1,1,2
 ```
 
 Empty entries have no image:
 ```
-0,0,0,,0
-0,,1,2,0
-0,2,,4,0
+3,3,3,,3
+3,,1,2,3
+3,2,,5,3
 ,,,,
 ```
 ## Usage
