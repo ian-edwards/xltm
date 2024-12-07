@@ -1,6 +1,6 @@
 # xltm
 
-xltm is a Python tool for creating csv tilemaps with corresponding image files from Excel files.
+xltm is a Python tool for creating csv tilemaps from Excel files.
 
 ## Excel
 
@@ -53,8 +53,6 @@ python xltm.py example.xlsx
 ```
 
 The first parameter is the path of the Excel file to process.
-
-All output files are written to the working directory.
 
 If the first parameter is omitted then no outputs are generated.
 
