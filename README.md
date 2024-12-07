@@ -74,16 +74,23 @@ If the second parameter is omitted outputs are written to the current directory
 import xltm
 from zipfile import ZipFile
 
-with ZipFile('./input/file/path.xlsx') as xlfile:
-    images = xltm.read_images(xlfile)
-    for image in images:
-        print(f'name: {todo}')
-        print(f'data: {todo}')
+with ZipFile('./input/file/path.xlsx') as xlfile:   # input files are zip archives
+    outdir = './output/directory/path'              # output directory path
 
-    sheets = xltm.read_sheets(xlfile)
+    images = xltm.read_images(xlfile)               # read all images in input file
+    for image in images:
+        print(f'id: {image.id}')                    # unique image id
+        print(f'extension: {image.extension}')      # image extension .png .jpeg etc.
+        print(f'data: {image.data}')                # image byte data
+        xltm.write_image(outdir, image)             # write single image to output directory
+    xltm.write_images(outdir, images)               # write all images to output directory
+
+    sheets = xltm.read_sheets(xlfile)               # read all sheets in input file
     for sheet in sheets:
-        print(f'name: {todo}')
-        print(f'data: {todo}')
+        print(f'name: {sheet.name}')                # sheet name
+        print(f'cells: {sheet.cells}')              # sheet cells as row major 2d string matrix
+        xltm.write_sheet(outdir, sheet)             # write single sheet csv to output directory
+    xltm.write_images(outdir, images)               # write all sheet csvs to output directory
 ```
 
 ## Compatibility
