@@ -85,6 +85,12 @@ xltm is compatible with xlsx and xlsm files
 
 xltm is not compatible with xlsb, xls or any other Excel files
 
+## Issues
+
+xltm currently only works for very simple cases where images are pasted into cells
+
+It does not work correctly if the image in a cell is the result of a formula
+
 ## Authors
 
 [Ian Edwards](mailto:ian.contact@proton.me)

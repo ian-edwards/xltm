@@ -24,7 +24,7 @@ def cells_matrix(cells: dict[(int, int), int]) -> list[list[int]]:
     return [[cells.get((r, c)) for c in range(columns_count(cells))] for r in range(rows_count(cells))]
 
 def read_cells(sheetpath: str, xlfile: ZipFile):
-    return {(cell_row(a := c.get('r')), cell_column(a)) : int(c.get('vm')) for c in read_xml(sheetpath, xlfile).findall(f'.//{{*}}c')}
+    return {(cell_row(a := c.get('r')), cell_column(a)) : None if (v := c.get('vm', None)) is None else int(v) for c in read_xml(sheetpath, xlfile).findall(f'.//{{*}}c')}
 
 def serialize_csv(cells: list[int]):
     return '\n'.join([','.join([str(c) if c is not None else '' for c in r]) for r in cells])
