@@ -67,14 +67,14 @@ If the second parameter is omitted outputs are written to the current directory
 xltm may also be invoked in code
 
 ```python
-import xltm
+from xltm import read_images, read_sheets, write_images, write_sheets
 from zipfile import ZipFile
 
 with ZipFile('./input/file/path.xlsx') as xlfile:
-    images = xltm.read_images(xlfile) # dict[str, data]
-    sheets = xltm.read_sheets(xlfile) # dict[str, list[list[int]]]
-    xltm.write_images('./output/directory/path/', images)
-    xltm.write_sheets('./output/directory/path/', sheets)
+    images = read_images(xlfile) # dict[str, bytes]
+    sheets = read_sheets(xlfile) # dict[str, list[list[int]]]
+    write_images('./output/directory/path/', images)
+    write_sheets('./output/directory/path/', sheets)
 ```
 
 ## Compatibility
