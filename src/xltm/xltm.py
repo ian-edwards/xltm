@@ -2,32 +2,23 @@ from pathlib import Path
 from io import BytesIO
 from zipfile import ZipFile
 from xml.etree import ElementTree
-from dataclasses import dataclass
 from functools import reduce
 import sys
 import re
-
-@dataclass
-class SheetData:
-    filename: str
-    data: list[list[int]]
 
 def read_images(xlfile: ZipFile):
     return {p[14:] : xlfile.read(p) for p in xlfile.namelist() if p.startswith('xl/media/image')}
 
 def read_sheets(xlfile: ZipFile):
-    return [SheetData(e.get('name') + '.csv', cells_matrix(read_cells(f'xl/worksheets/sheet{e.get('sheetId')}.xml', xlfile))) for e in xml_elements('sheet', read_file('xl/workbook.xml', xlfile))]
+    return {e.get('name') + '.csv' : cells_matrix(read_cells(f'xl/worksheets/sheet{e.get('sheetId')}.xml', xlfile)) for e in xml_elements('sheet', read_file('xl/workbook.xml', xlfile))}
 
 def write_images(outdir: str, images: dict[str, bytes]):
     for (name, data) in images.items():
-        Path(outdir).joinpath(Path(name)).write_bytes(data)
+        Path(outdir).joinpath(name).write_bytes(data)
 
-def write_sheets(outdir: str, sheets: list[SheetData]):
-    for sheet in sheets:
-        write_sheet(outdir, sheet)
-
-def write_sheet(outdir: str, sheet: SheetData):
-    Path(outdir).joinpath(Path(sheet.filename)).write_text(serialize_csv(sheet.data))
+def write_sheets(outdir: str, sheets: dict[str, list[list[int]]]):
+    for (name, cells) in sheets.items():
+        Path(outdir).joinpath(name).write_text(serialize_csv(cells))
 
 def cells_matrix(cells: dict[(int, int), int]) -> list[list[str]]:
     return [[cells.get((r, c)) for c in range(columns_count(cells))] for r in range(rows_count(cells))]
@@ -60,9 +51,9 @@ def xml_elements(path: str, tree: ElementTree):
     return tree.findall(f'.//{{*}}{path}')
 
 if __name__ == "__main__":
-    if len(args := sys.argv) > 1:
+    if (largs := len(args := sys.argv)) > 1:
         with ZipFile(args[1]) as xlfile:
-            write_images(outpath := args[2] if len(args) > 2 else './', read_images(xlfile))
+            write_images(outpath := args[2] if largs > 2 else './', read_images(xlfile))
             write_sheets(outpath, read_sheets(xlfile))
     else:
         sys.exit('Error Code 2: Input File Required')
