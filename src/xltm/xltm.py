@@ -9,13 +9,13 @@ import sys
 import re
 
 @dataclass
-class Image:
+class FileImage:
     id: int
     extension: str
     data: bytes
 
 @dataclass
-class Sheet:
+class FileSheet:
     name: str
     cells: list[list[str]]
 
@@ -23,25 +23,25 @@ def write_outputs(outdir: str, xlfile: ZipFile):
     write_images(outdir, read_images(xlfile))
     write_sheets(outdir, read_sheets(xlfile))
 
-def write_images(outdir: str, images: list[Image]):
+def write_images(outdir: str, images: list[FileImage]):
     for image in images:
         write_image(outdir, image)
 
-def write_sheets(outdir: str, sheets: list[Sheet]):
+def write_sheets(outdir: str, sheets: list[FileSheet]):
     for sheet in sheets:
         write_sheet(outdir, sheet)
 
-def write_sheet(outdir: str, sheet: Sheet):
+def write_sheet(outdir: str, sheet: FileSheet):
     Path(outdir).joinpath(Path(f'{sheet.name}.csv')).write_text(serialize_csv(sheet.cells))
 
-def write_image(outdir: str, image: Image):
+def write_image(outdir: str, image: FileImage):
     Path(outdir).joinpath(Path(f'{image.id}{image.extension}')).write_bytes(image.data)
 
 def read_images(xlfile: ZipFile):
-    return [Image(i, Path(p).suffix, xlfile.read(p)) for p, i in images_info(xlfile)]
+    return [FileImage(i, Path(p).suffix, xlfile.read(p)) for p, i in images_info(xlfile)]
 
-def read_sheets(xl: ZipFile):
-    return [Sheet(e.get('name'), cells_matrix(read_cells(f'xl/worksheets/sheet{e.get('sheetId')}.xml', xl))) for e in xml_elements('sheet', read_file('xl/workbook.xml', xl))]
+def read_sheets(xlfile: ZipFile):
+    return [FileSheet(e.get('name'), cells_matrix(read_cells(f'xl/worksheets/sheet{e.get('sheetId')}.xml', xlfile))) for e in xml_elements('sheet', read_file('xl/workbook.xml', xlfile))]
 
 def image_id(element: Element):
     return int(element.get('Id')[3:])
@@ -49,11 +49,11 @@ def image_id(element: Element):
 def image_path(element: Element):
     return 'xl' + element.get('Target')[2:]
 
-def image_elements(xl: ZipFile) -> list[Element]:
-    return [e for e in xml_elements('Relationship', read_file('xl/richData/_rels/richValueRel.xml.rels', xl)) if e.get('Type').endswith('/image')]
+def image_elements(xlfile: ZipFile) -> list[Element]:
+    return [e for e in xml_elements('Relationship', read_file('xl/richData/_rels/richValueRel.xml.rels', xlfile)) if e.get('Type').endswith('/image')]
 
-def images_info(zip: ZipFile):
-    return [(image_path(e), image_id(e)) for e in image_elements(zip)]
+def images_info(xlfile: ZipFile):
+    return [(image_path(e), image_id(e)) for e in image_elements(xlfile)]
 
 def cells_matrix(cells: dict[(int, int), int]) -> list[list[str]]:
     return [[cells.get((r, c)) for c in range(columns_count(cells))] for r in range(rows_count(cells))]
