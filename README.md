@@ -4,8 +4,6 @@ xltm is a Python library that converts Excel files into csv tilemaps with corres
 
 Excel Desktop and Excel Web can be used to generate tilemaps by inserting [pictures in-cell](https://support.microsoft.com/en-us/office/insert-picture-in-cell-in-excel-e9317aee-4294-49a3-875c-9dd95845bab0)
 
-![Example Tilemap](./example.png)
-
 This can be a quick and easy way to generate a large number of visual tilemaps
 
 Unfortunately, Excel files are not a convenient format to use in other projects
