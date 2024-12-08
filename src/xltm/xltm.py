@@ -14,13 +14,13 @@ def write_images(outdir: str, images: dict[str, bytes]):
         Path(outdir).joinpath(name).write_bytes(data)
 
 def read_sheets(xlfile: ZipFile):
-    return {e.get('name') + '.csv' : cells_matrix(read_cells(f'xl/worksheets/sheet{e.get('sheetId')}.xml', xlfile)) for e in read_xml('xl/workbook.xml', xlfile).findall(f'.//{{*}}sheet')}
+    return {e.get('name', '') + '.csv' : cells_matrix(read_cells(f'xl/worksheets/sheet{e.get('sheetId')}.xml', xlfile)) for e in read_xml('xl/workbook.xml', xlfile).findall(f'.//{{*}}sheet')}
 
 def write_sheets(outdir: str, sheets: dict[str, list[list[int]]]):
     for (name, cells) in sheets.items():
         Path(outdir).joinpath(name).write_text(serialize_csv(cells))
 
-def cells_matrix(cells: dict[(int, int), int]) -> list[list[str]]:
+def cells_matrix(cells: dict[(int, int), int]) -> list[list[int]]:
     return [[cells.get((r, c)) for c in range(columns_count(cells))] for r in range(rows_count(cells))]
 
 def read_cells(sheetpath: str, xlfile: ZipFile):
