@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch xltm",
+            "name": "Launch",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}\\src\\xltm\\xltm.py",

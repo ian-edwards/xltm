@@ -72,42 +72,13 @@ xltm may also be invoked in code
 import xltm
 from zipfile import ZipFile
 
-# Write sheets and images to the output directory
 with ZipFile('./input/file/path.xlsx') as xlfile:
-    xltm.write_outputs('./output/directory/path', xlfile)
+    images = xltm.read_images(xlfile) # dict[str, data]
+    sheets = xltm.read_sheets(xlfile) # dict[str, list[list[int]]]
+    xltm.write_images('./output/directory/path/', images)
+    xltm.write_sheets('./output/directory/path/', sheets)
 ```
 
-```python
-import xltm
-from zipfile import ZipFile
-
-# Write sheets and images to different output directories
-with ZipFile('./input/file/path.xlsx') as xlfile:
-    images = xltm.read_images(xlfile)
-    sheets = xltm.read_sheets(xlfile)
-    xltm.write_images('./output/directory/path/images', images)
-    xltm.write_sheets('./output/directory/path/sheets', sheets)
-```
-
-```python
-import xltm
-from zipfile import ZipFile
-
-# Write individual sheets and images to different output directories
-with ZipFile('./input/file/path.xlsx') as xlfile:
-    images = xltm.read_images(xlfile)
-    for image in images:
-        print(f'id: {image.id}')
-        print(f'extension: {image.extension}')
-        print(f'data: {image.data}')
-        xltm.write_image(f'./output/directory/path/images/{image.id}', image)
-
-    sheets = xltm.read_sheets(xlfile)
-    for sheet in sheets:
-        print(f'name: {sheet.name}')
-        print(f'cells: {sheet.cells}')
-        xltm.write_sheet(f'./output/directory/path/sheets/{sheet.name}', sheet)
-```
 ## Compatibility
 
 xltm is compatible with Pyton >= 3.8
