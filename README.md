@@ -19,7 +19,7 @@ All images are extracted from the workbook and are written to the output directo
 3.jpeg
 5.jpg
 ```
-Ids are positive integers that may not be contiguous
+Ids are integers that may not be contiguous
 
 Extensions depend on the source format of the image in Excel
 
@@ -39,7 +39,7 @@ Each entry in the csv file corresponds to an image id
 1,1,1,1,2
 ```
 
-Empty entries have no image
+Empty csv entries correspond to tiles that have no images
 ```
 3,3,3,,3
 3,,1,2,3
