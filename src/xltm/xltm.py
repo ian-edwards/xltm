@@ -3,18 +3,18 @@ from io import BytesIO
 from zipfile import ZipFile
 from xml.etree import ElementTree
 from functools import reduce
-import sys
+from sys import argv, exit
 import re
 
 def read_images(xlfile: ZipFile):
     return {p[14:] : xlfile.read(p) for p in xlfile.namelist() if p.startswith('xl/media/image')}
 
-def read_sheets(xlfile: ZipFile):
-    return {e.get('name') + '.csv' : cells_matrix(read_cells(f'xl/worksheets/sheet{e.get('sheetId')}.xml', xlfile)) for e in read_xml('xl/workbook.xml', xlfile).findall(f'.//{{*}}sheet')}
-
 def write_images(outdir: str, images: dict[str, bytes]):
     for (name, data) in images.items():
         Path(outdir).joinpath(name).write_bytes(data)
+
+def read_sheets(xlfile: ZipFile):
+    return {e.get('name') + '.csv' : cells_matrix(read_cells(f'xl/worksheets/sheet{e.get('sheetId')}.xml', xlfile)) for e in read_xml('xl/workbook.xml', xlfile).findall(f'.//{{*}}sheet')}
 
 def write_sheets(outdir: str, sheets: dict[str, list[list[int]]]):
     for (name, cells) in sheets.items():
@@ -48,9 +48,10 @@ def read_xml(path: str, xl: ZipFile):
     return ElementTree.parse(BytesIO(xl.read(path)))
 
 if __name__ == "__main__":
-    if (largs := len(args := sys.argv)) > 1:
-        with ZipFile(args[1]) as xlfile:
-            write_images(outpath := args[2] if largs > 2 else './', read_images(xlfile))
+    if len(argv) > 1:
+        with ZipFile(argv[1]) as xlfile:
+            outpath = argv[2] if len(argv) > 2 else './'
+            write_images(outpath, read_images(xlfile))
             write_sheets(outpath, read_sheets(xlfile))
     else:
-        sys.exit('Error Code 2: Input File Required')
+        exit('Error Code 2: Input File Required')
